@@ -11,7 +11,7 @@ import javax.annotation.PostConstruct;
  * @date 2021-05-16
  * @Description: 用户
  */
-@Service
+//@Service
 public class UserServiceImpl {
 
 	@Autowired

@@ -79,6 +79,7 @@ public class AspectJWeavingEnabler
 
 
 	/**
+	 * 允许通过给定的LoadTimeWeaver进行aspectj织入
 	 * Enable AspectJ weaving with the given {@link LoadTimeWeaver}.
 	 * @param weaverToUse the LoadTimeWeaver to apply to (or {@code null} for a default weaver)
 	 * @param beanClassLoader the class loader to create a default weaver for (if necessary)
@@ -86,14 +87,19 @@ public class AspectJWeavingEnabler
 	public static void enableAspectJWeaving(
 			@Nullable LoadTimeWeaver weaverToUse, @Nullable ClassLoader beanClassLoader) {
 
+		// 如果LoadTimeWeaver对象为空，那么需要准备LoadTimeWeaver对象
 		if (weaverToUse == null) {
+			// 检测当前Instrumentation实例是否能从当前jvm中获取到
 			if (InstrumentationLoadTimeWeaver.isInstrumentationAvailable()) {
+				// 创建InstrumentationLoadTimeWeaver对象
 				weaverToUse = new InstrumentationLoadTimeWeaver(beanClassLoader);
 			}
 			else {
+				// 否则，抛出异常
 				throw new IllegalStateException("No LoadTimeWeaver available");
 			}
 		}
+		// 给LoadTimeWeaver添加转换操作
 		weaverToUse.addTransformer(
 				new AspectJClassBypassingClassFileTransformer(new ClassPreProcessorAgentAdapter()));
 	}

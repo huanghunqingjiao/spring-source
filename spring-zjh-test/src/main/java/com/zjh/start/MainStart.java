@@ -2,6 +2,7 @@ package com.zjh.start;
 
 import com.zjh.bean.UserServiceImpl;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,8 +44,8 @@ public class MainStart {
 //		o.sayHi();
 	}
 
-//	@Bean
-//	public UserServiceImpl userService() {
-//		return new UserServiceImpl();
-//	}
+	@Bean
+	public UserServiceImpl userService() {
+		return new UserServiceImpl();
+	}
 }

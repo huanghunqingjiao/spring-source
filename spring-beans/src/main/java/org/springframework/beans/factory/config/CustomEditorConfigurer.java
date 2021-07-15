@@ -142,12 +142,17 @@ public class CustomEditorConfigurer implements BeanFactoryPostProcessor, Ordered
 
 	@Override
 	public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+		// 如果属性编辑注册器不等于空
 		if (this.propertyEditorRegistrars != null) {
+			// 遍历属性编辑注册器的集合
 			for (PropertyEditorRegistrar propertyEditorRegistrar : this.propertyEditorRegistrars) {
+				// 将属性编辑注册器添加到beanFactory
 				beanFactory.addPropertyEditorRegistrar(propertyEditorRegistrar);
 			}
 		}
+		// 如果自定义编辑器不等于空
 		if (this.customEditors != null) {
+			// 遍历自定义编辑器集合将自定义编辑器添加到beanFactory中
 			this.customEditors.forEach(beanFactory::registerCustomEditor);
 		}
 	}
