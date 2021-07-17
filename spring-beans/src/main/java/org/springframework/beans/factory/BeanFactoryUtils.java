@@ -72,6 +72,8 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * 判断是不是有&前缀，没有就直接返回，说明不是FactoryBean的名字，否则就从缓存里获取，然后就把前缀&去掉返回
+	 *
 	 * Return the actual bean name, stripping out the factory dereference
 	 * prefix (if any, also stripping repeated factory prefixes if found).
 	 * @param name the name of the bean
@@ -80,9 +82,11 @@ public abstract class BeanFactoryUtils {
 	 */
 	public static String transformedBeanName(String name) {
 		Assert.notNull(name, "'name' must not be null");
+		// 如果beanName不以&开头，则直接返回
 		if (!name.startsWith(BeanFactory.FACTORY_BEAN_PREFIX)) {
 			return name;
 		}
+		// 将beanName截取&之后返回
 		return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
 			do {
 				beanName = beanName.substring(BeanFactory.FACTORY_BEAN_PREFIX.length());
@@ -238,6 +242,8 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * 返回给定类型的所有bean的名称集合，包括定义在祖先中的bean
+	 *
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
 	 * <p>Does consider objects created by FactoryBeans if the "allowEagerInit"
@@ -518,6 +524,8 @@ public abstract class BeanFactoryUtils {
 
 
 	/**
+	 * 合并父子容器的beanName
+	 *
 	 * Merge the given bean names result with the given parent result.
 	 * @param result the local bean name result
 	 * @param parentResult the parent bean name result (possibly empty)

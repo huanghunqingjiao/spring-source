@@ -207,10 +207,22 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 * @return the transformed name
 	 */
 	public String canonicalName(String name) {
+		/*
+		 * 这里使用 while 循环进行处理，原因是：可能会存在多重别名的问题，即别名指向别名。比如下面
+		 * 的配置：
+		 *   <bean id="tulingDao" class="com.tuling.mapper.tulingDao"/>
+		 *   <alias name="tulingDao" alias="aliasA"/>
+		 *   <alias name="aliasA" alias="aliasB"/>
+		 *
+		 * 上面的别名指向关系为 aliasB -> aliasA -> tulingDao，对于上面的别名配置，aliasMap 中数据
+		 * 视图为：aliasMap = [<aliasB, aliasA>, <aliasA, tulingDao>]。通过下面的循环解析别名
+		 * aliasB 最终指向的 beanName
+		 */
 		String canonicalName = name;
 		// Handle aliasing...
 		String resolvedName;
 		do {
+			// 将别名解析成真正的beanName
 			resolvedName = this.aliasMap.get(canonicalName);
 			if (resolvedName != null) {
 				canonicalName = resolvedName;

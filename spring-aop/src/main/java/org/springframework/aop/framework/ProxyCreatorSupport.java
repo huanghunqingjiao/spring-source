@@ -95,6 +95,7 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 
 
 	/**
+	 * 创建AOP代理，如果激活了，就需要有激活通知
 	 * Subclasses should call this to get a new AOP proxy. They should <b>not</b>
 	 * create an AOP proxy with {@code this} as an argument.
 	 */
@@ -102,10 +103,13 @@ public class ProxyCreatorSupport extends AdvisedSupport {
 		if (!this.active) {
 			activate();
 		}
+		// 通过AopProxyFactory获得AopProxy，这个AopProxyFactory是在初始化函数中定义的，使用的是DefaultAopProxyFactory
 		return getAopProxyFactory().createAopProxy(this);
 	}
 
 	/**
+	 * 激活通知，跟前面的添加接口的通知一样，都是给AdvisedSupportListener通知
+	 *
 	 * Activate this proxy configuration.
 	 * @see AdvisedSupportListener#activated
 	 */

@@ -366,6 +366,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	Object resolveBeanByName(String name, DependencyDescriptor descriptor) throws BeansException;
 
 	/**
+	 * 根据descriptor的依赖类型解析出与descriptor所包装的对象匹配的候选Bean对象
+	 *
 	 * Resolve the specified dependency against the beans defined in this factory.
 	 * @param descriptor the descriptor for the dependency (field/method/constructor)
 	 * @param requestingBeanName the name of the bean which declares the given dependency
@@ -380,6 +382,8 @@ public interface AutowireCapableBeanFactory extends BeanFactory {
 	Object resolveDependency(DependencyDescriptor descriptor, @Nullable String requestingBeanName) throws BeansException;
 
 	/**
+	 * 根据descriptor的依赖类型解析出与descriptor所包装的对象匹配的候选Bean对象
+	 *
 	 * Resolve the specified dependency against the beans defined in this factory.
 	 * @param descriptor the descriptor for the dependency (field/method/constructor)
 	 * @param requestingBeanName the name of the bean which declares the given dependency

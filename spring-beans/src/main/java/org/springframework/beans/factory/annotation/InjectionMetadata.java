@@ -98,6 +98,10 @@ public class InjectionMetadata {
 		return this.targetClass != clazz;
 	}
 
+	/**
+	 * 如果集合中有注解的属性和方法，就会将它们注册到beanDefinition的集合externallyManagedConfigMembers中
+	 * @param beanDefinition
+	 */
 	public void checkConfigMembers(RootBeanDefinition beanDefinition) {
 		Set<InjectedElement> checkedElements = new LinkedHashSet<>(this.injectedElements.size());
 		for (InjectedElement element : this.injectedElements) {
@@ -110,6 +114,13 @@ public class InjectionMetadata {
 		this.checkedElements = checkedElements;
 	}
 
+	/**
+	 * 遍历前面注册的InjectedElement，然后进行注入
+	 * @param target
+	 * @param beanName
+	 * @param pvs
+	 * @throws Throwable
+	 */
 	public void inject(Object target, @Nullable String beanName, @Nullable PropertyValues pvs) throws Throwable {
 		Collection<InjectedElement> checkedElements = this.checkedElements;
 		Collection<InjectedElement> elementsToIterate =
@@ -138,6 +149,8 @@ public class InjectionMetadata {
 
 
 	/**
+	 * 根据是否有属性和方法有@Autowired和@Value注解，没有就返回InjectionMetadata.EMPTY,有的话就封装成InjectionMetadata返回
+	 *
 	 * Return an {@code InjectionMetadata} instance, possibly for empty elements.
 	 * @param elements the elements to inject (possibly empty)
 	 * @param clazz the target class
@@ -150,6 +163,8 @@ public class InjectionMetadata {
 	}
 
 	/**
+	 * 判断给定的注入元数据是否需要被刷新
+	 *
 	 * Check whether the given injection metadata needs to be refreshed.
 	 * @param metadata the existing metadata instance
 	 * @param clazz the current target class
@@ -217,22 +232,29 @@ public class InjectionMetadata {
 		}
 
 		/**
+		 * 进行属性或者方法注入，但是方法注入前会判断是否已经有设置值了，有设置就不会注入，直接返回
+		 *
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
 		 */
 		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
 				throws Throwable {
 
+			// 属性注入
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
+				// 如果是使用字段形式的注入，getResourceToInject由子类@ResourceElement实现
 				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
+				// 此步骤检测如果bean已经显示的设置一个对象依赖引用则跳过使用setter方法再次赋值
 				if (checkPropertySkipping(pvs)) {
 					return;
 				}
 				try {
+					// 方法注入
 					Method method = (Method) this.member;
+					// 支持私有方法
 					ReflectionUtils.makeAccessible(method);
 					method.invoke(target, getResourceToInject(target, requestingBeanName));
 				}
@@ -243,6 +265,8 @@ public class InjectionMetadata {
 		}
 
 		/**
+		 * 判断是否要略过属性注入，如果是定义的时候给定值了就忽略
+		 *
 		 * Check whether this injector's property needs to be skipped due to
 		 * an explicit property value having been specified. Also marks the
 		 * affected property as processed for other processors to ignore it.
@@ -264,9 +288,11 @@ public class InjectionMetadata {
 				if (this.pd != null) {
 					if (pvs.contains(this.pd.getName())) {
 						// Explicit value provided as part of the bean definition.
+						// 给定了值就忽略，直接返回
 						this.skip = true;
 						return true;
 					}
+					// 如果是可变的话，就注册到处理过的属性集合里
 					else if (pvs instanceof MutablePropertyValues) {
 						((MutablePropertyValues) pvs).registerProcessedProperty(this.pd.getName());
 					}
