@@ -27,6 +27,8 @@ import org.springframework.asm.Type;
 import org.springframework.cglib.core.internal.CustomizerRegistry;
 
 /**
+ * 生成class为了处理多个键的组合一起作为key，例如，1,2,3是一个组合，2,3也是一个组合，都可以作为key
+ *
  * Generates classes to handle multi-valued keys, for use in things such as Maps and Sets.
  * Code for <code>equals</code> and <code>hashCode</code> methods follow the
  * the rules laid out in <i>Effective Java</i> by Joshua Bloch.
@@ -166,21 +168,27 @@ abstract public class KeyFactory {
 
 	public static KeyFactory create(ClassLoader loader, Class keyInterface, KeyFactoryCustomizer customizer,
 			List<KeyFactoryCustomizer> next) {
+		// 创建一个最简易的代理类生成器 即只会生成HashCode equals toString newInstance方法
 		Generator gen = new Generator();
+		// 设置接口为enhancerKey类型
 		gen.setInterface(keyInterface);
 		// SPRING PATCH BEGIN
 		gen.setContextClass(keyInterface);
 		// SPRING PATCH END
 
 		if (customizer != null) {
+			// 添加定制器
 			gen.addCustomizer(customizer);
 		}
 		if (next != null && !next.isEmpty()) {
 			for (KeyFactoryCustomizer keyFactoryCustomizer : next) {
+				// 添加定制器
 				gen.addCustomizer(keyFactoryCustomizer);
 			}
 		}
+		// 设置生成器的类加载器
 		gen.setClassLoader(loader);
+		// 生成enhancerKey的代理类
 		return gen.create();
 	}
 
@@ -233,6 +241,7 @@ abstract public class KeyFactory {
 		}
 
 		public KeyFactory create() {
+			// 设置了该生成器生成代理类的名字前缀，即我们的接口名Enhancer.enhancerKey
 			setNamePrefix(keyInterface.getName());
 			return (KeyFactory) super.create(keyInterface.getName());
 		}

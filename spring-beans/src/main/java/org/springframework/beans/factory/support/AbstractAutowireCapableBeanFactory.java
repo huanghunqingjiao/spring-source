@@ -1568,8 +1568,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// state of the bean before properties are set. This can be used, for example,
 		// to support styles of field injection.
 		// 给任何实现了InstantiationAwareBeanPostProcessors的子类机会去修改bean的状态再设置属性之前，可以被用来支持类型的字段注入
-		//是否"synthetic"。一般是指只有AOP相关的prointCut配置或者Advice配置才会将 synthetic设置为true，私有内部类构造器外部不能访问，jvm会自动生成synthetic方法供类生成
-		//如果mdb是不是'syntheic' 且 工厂拥有InstiationAwareBeanPostProcessor
+		//是否"synthetic"。一般是指只有AOP相关的pointCut配置或者Advice配置才会将 synthetic设置为true，私有内部类构造器外部不能访问，jvm会自动生成synthetic方法供类生成
+		//如果mdb是不是'syntheic' 且 工厂拥有InstantiationAwareBeanPostProcessor
 		if (!mbd.isSynthetic() && hasInstantiationAwareBeanPostProcessors()) {
 			//遍历工厂中的BeanPostProcessor对象
 			for (InstantiationAwareBeanPostProcessor bp : getBeanPostProcessorCache().instantiationAware) {
@@ -1614,7 +1614,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		//经过筛选的PropertyDescriptor数组,存放着排除忽略的依赖项或忽略项上的定义的属性
 		PropertyDescriptor[] filteredPds = null;
-		//如果工厂拥有InstantiationAwareBeanPostProcessor,那么处理对应的流程，主要是对几个注解的赋值工作包含的两个关键子类是CommonAnnoationBeanPostProcessor,AutowiredAnnotationBeanPostProcessor
+		//如果工厂拥有InstantiationAwareBeanPostProcessor,那么处理对应的流程，主要是对几个注解的赋值工作包含的两个关键子类是CommonAnnotationBeanPostProcessor,AutowiredAnnotationBeanPostProcessor
 		if (hasInstAwareBpps) {
 			//如果pvs为null
 			if (pvs == null) {

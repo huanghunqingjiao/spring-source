@@ -99,6 +99,7 @@ public class MethodInvocationProceedingJoinPoint implements ProceedingJoinPoint,
 					"but was passed " + arguments.length + " arguments");
 		}
 		this.methodInvocation.setArguments(arguments);
+		// mi.proceed()  CglibMethodInvocation
 		return this.methodInvocation.invocableClone(arguments).proceed();
 	}
 

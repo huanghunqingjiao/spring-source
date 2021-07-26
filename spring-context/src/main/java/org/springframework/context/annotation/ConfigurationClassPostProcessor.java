@@ -70,6 +70,12 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
+ * 此类是一个后置处理器的类，主要功能是参与BeanFactory的建造，主要功能如下
+ * 1、解析加了@Configuration的配置类
+ * 2、解析@ComponentScan扫描的包
+ * 3、解析@ComponentScans扫描的包
+ * 4、解析@Import注解
+ *
  * {@link BeanFactoryPostProcessor} used for bootstrapping processing of
  * {@link Configuration @Configuration} classes.
  *
@@ -92,6 +98,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		PriorityOrdered, ResourceLoaderAware, ApplicationStartupAware, BeanClassLoaderAware, EnvironmentAware {
 
 	/**
+	 * 使用类的全限定名作为bean的默认生成策略
+	 *
 	 * A {@code BeanNameGenerator} using fully qualified class names as default bean names.
 	 * <p>This default for configuration-level import purposes may be overridden through
 	 * {@link #setBeanNameGenerator}. Note that the default for component scanning purposes
@@ -132,12 +140,17 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	@Nullable
 	private ConfigurationClassBeanDefinitionReader reader;
 
+	// 是否使用本地xml配置的beanNameGenerator生成器
 	private boolean localBeanNameGeneratorSet = false;
 
-	/* Using short class names as default bean names by default. */
+	/*
+		// 使用短类名作为bean名称生成策略
+	 Using short class names as default bean names by default. */
 	private BeanNameGenerator componentScanBeanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
-	/* Using fully qualified class names as default bean names by default. */
+	/*
+	使用类的全限定名作为bean默认生成策略
+	Using fully qualified class names as default bean names by default. */
 	private BeanNameGenerator importBeanNameGenerator = IMPORT_BEAN_NAME_GENERATOR;
 
 	private ApplicationStartup applicationStartup = ApplicationStartup.DEFAULT;
@@ -251,6 +264,8 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 	}
 
 	/**
+	 * 添加CGLIB增强处理及ImportAwareBeanPostProcessor后置处理类
+	 *
 	 * Prepare the Configuration classes for servicing bean requests at runtime
 	 * by replacing them with CGLIB-enhanced subclasses.
 	 */
@@ -268,6 +283,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
 
+		// 使用cglib对配置类进行代理，因为@Bean方法到时候要进行创建Bean的实例
 		enhanceConfigurationClasses(beanFactory);
 		beanFactory.addBeanPostProcessor(new ImportAwareBeanPostProcessor(beanFactory));
 	}
@@ -460,6 +476,12 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					}
 				}
 			}
+			/*
+			 只有full版配置类才会创建cglib代理
+			 虽然我们在指定配置的时候不标注@Configuration也行，所以加不加注解的区别就在这里
+			 那么加了@Configuration和不加有本质上有什么区别的？
+			 当在配置类中一个@Bean 使用方法的方式引用另一个Bean如果不加注解就会重复加载Bean
+			 如果加了@Configuration  则会在这里创建cglib代理，当调用@Bean方法时会先检测容器中是否存在*/
 			if (ConfigurationClassUtils.CONFIGURATION_CLASS_FULL.equals(configClassAttr)) {
 				if (!(beanDef instanceof AbstractBeanDefinition)) {
 					throw new BeanDefinitionStoreException("Cannot enhance @Configuration bean definition '" +
@@ -493,6 +515,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					logger.trace(String.format("Replacing bean definition '%s' existing class '%s' with " +
 							"enhanced class '%s'", entry.getKey(), configClass.getName(), enhancedClass.getName()));
 				}
+				// 重新修改Bean定义的Class，在创建Bean的实例时将会实例cglib的类
 				beanDef.setBeanClass(enhancedClass);
 			}
 		}

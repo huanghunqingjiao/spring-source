@@ -1,5 +1,8 @@
 package com.zjh.iocbeanlifecicle;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /***
  * @Author 徐庶   QQ:1092002729
  * @Slogan 致敬大师，致敬未来的你
@@ -7,6 +10,8 @@ package com.zjh.iocbeanlifecicle;
 //@Component
 public class Tank  {
 
+	@Autowired
+	private Car car;
 
 	private Integer index;
 

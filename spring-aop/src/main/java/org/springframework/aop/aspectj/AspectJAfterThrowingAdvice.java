@@ -26,6 +26,9 @@ import org.springframework.aop.AfterAdvice;
 import org.springframework.lang.Nullable;
 
 /**
+ * 使用AspectJ Around注解的后置通知类型。
+ * 实现了MethodInterceptor、AfterAdvice接口。继承了AbstractAspectJAdvice
+ *
  * Spring AOP advice wrapping an AspectJ after-throwing advice method.
  *
  * @author Rod Johnson
@@ -61,10 +64,13 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice
 	@Nullable
 	public Object invoke(MethodInvocation mi) throws Throwable {
 		try {
+			// 执行下一个通知/拦截器  methodInvocation
 			return mi.proceed();
 		}
 		catch (Throwable ex) {
+			// 抛出异常
 			if (shouldInvokeOnThrowing(ex)) {
+				// 执行异常通知
 				invokeAdviceMethod(getJoinPointMatch(), null, ex);
 			}
 			throw ex;

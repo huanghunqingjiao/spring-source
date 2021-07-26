@@ -28,6 +28,8 @@ import org.springframework.aop.ProxyMethodInvocation;
 import org.springframework.lang.Nullable;
 
 /**
+ * 使用AspectJ Around注解的后置通知类型。
+ *
  * Spring AOP around advice (MethodInterceptor) that wraps
  * an AspectJ advice method. Exposes ProceedingJoinPoint.
  *
@@ -67,6 +69,7 @@ public class AspectJAroundAdvice extends AbstractAspectJAdvice implements Method
 			throw new IllegalStateException("MethodInvocation is not a Spring ProxyMethodInvocation: " + mi);
 		}
 		ProxyMethodInvocation pmi = (ProxyMethodInvocation) mi;
+		// 里面只是包装了一层对象
 		ProceedingJoinPoint pjp = lazyGetProceedingJoinPoint(pmi);
 		JoinPointMatch jpm = getJoinPointMatch(pmi);
 		return invokeAdviceMethod(pjp, jpm, null, null);

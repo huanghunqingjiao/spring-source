@@ -10,13 +10,23 @@ public class MainStarter {
 	public static void main(String[] args) {
 		// 加载spring上下文
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(MainConfig.class);
+		// 循环依赖
+		Object bean = context.getBean("a");
+		System.err.println(bean);
+		bean = context.getBean("b");
+		System.err.println(bean);
+
+//		Car bean = context.getBean(Car.class);
+//		System.err.println(bean);
+//		Tank tank = context.getBean(Tank.class);
+//		System.err.println(tank);
 
 //		Car car = (Car) context.getBean("car");
 //		System.out.println(car.getName());
 //		MyBeanFactoryPostProcessor bean = context.getBean(MyBeanFactoryPostProcessor.class);
 //		System.err.println(bean);
-		Object myFactoryBean = context.getBean("myFactoryBean");
-		System.err.println(myFactoryBean.getClass());
+//		Object myFactoryBean = context.getBean("myFactoryBean");
+//		System.err.println(myFactoryBean.getClass());
 	}
 
 

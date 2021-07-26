@@ -1,5 +1,8 @@
 package com.zjh.iocbeanlifecicle;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 /**
  * Created by xsls on 2019/8/15.
  */
@@ -8,6 +11,7 @@ public  class Car {
 
 	private String name;
 
+	@Autowired
 	private Tank tank;
 
 	public void setTank(Tank tank) {

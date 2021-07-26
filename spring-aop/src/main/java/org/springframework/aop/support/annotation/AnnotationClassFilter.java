@@ -63,7 +63,10 @@ public class AnnotationClassFilter implements ClassFilter {
 
 	@Override
 	public boolean matches(Class<?> clazz) {
-		return (this.checkInherited ? AnnotatedElementUtils.hasAnnotation(clazz, this.annotationType) :
+		return (this.checkInherited ?
+				// 继承的注解也会找出来
+				AnnotatedElementUtils.hasAnnotation(clazz, this.annotationType) :
+				// 只会看自己本类的注解
 				clazz.isAnnotationPresent(this.annotationType));
 	}
 

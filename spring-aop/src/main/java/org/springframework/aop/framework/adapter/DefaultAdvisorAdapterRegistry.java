@@ -27,6 +27,9 @@ import org.springframework.aop.Advisor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 
 /**
+ * AdvisorAdapterRegistry的实现类。也是SpringAOP中唯一默认的实现类。
+ * 持有：MethodBeforeAdviceAdapter、AfterReturningAdviceAdapter、ThrowsAdviceAdapter实例。
+ *
  * Default implementation of the {@link AdvisorAdapterRegistry} interface.
  * Supports {@link org.aopalliance.intercept.MethodInterceptor},
  * {@link org.springframework.aop.MethodBeforeAdvice},
@@ -40,13 +43,20 @@ import org.springframework.aop.support.DefaultPointcutAdvisor;
 @SuppressWarnings("serial")
 public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Serializable {
 
+	/**
+	 * 持有一个AdvisorAdapter的List，这个List中的adapter是与实现Spring AOP的advice增强功能相对应的
+	 */
 	private final List<AdvisorAdapter> adapters = new ArrayList<>(3);
 
 
 	/**
+	 * 此方法把已有的advice实现的adapter加入进来
+	 *
 	 * Create a new DefaultAdvisorAdapterRegistry, registering well-known adapters.
 	 */
 	public DefaultAdvisorAdapterRegistry() {
+		// 只加这三个是因为AspectJAfterAdvice,AspectJAroundAdvice,AspectJAfterThrowingAdvice已经实现了MethodInterceptor接口，
+		// 下面getInterceptors方法需要用到
 		registerAdvisorAdapter(new MethodBeforeAdviceAdapter());
 		registerAdvisorAdapter(new AfterReturningAdviceAdapter());
 		registerAdvisorAdapter(new ThrowsAdviceAdapter());
@@ -55,17 +65,21 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 
 	@Override
 	public Advisor wrap(Object adviceObject) throws UnknownAdviceTypeException {
+		// 如果要封装的对象本身就是Advisor类型，那么无须做任何处理
 		if (adviceObject instanceof Advisor) {
 			return (Advisor) adviceObject;
 		}
+		// 如果类型不是Advisor和Advice两种类型的数据，那么将不能进行封装
 		if (!(adviceObject instanceof Advice)) {
 			throw new UnknownAdviceTypeException(adviceObject);
 		}
 		Advice advice = (Advice) adviceObject;
 		if (advice instanceof MethodInterceptor) {
 			// So well-known it doesn't even need an adapter.
+			// 如果是MethodInterceptor类型则使用DefaultPointcutAdvisor封装
 			return new DefaultPointcutAdvisor(advice);
 		}
+		// 如果存在Advisor的适配器那么也同样需要进行封装
 		for (AdvisorAdapter adapter : this.adapters) {
 			// Check that it is supported.
 			if (adapter.supportsAdvice(advice)) {
@@ -75,15 +89,24 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		throw new UnknownAdviceTypeException(advice);
 	}
 
+	/**
+	 * 将 Advisor转换为 MethodInterceptor
+	 * @param advisor the Advisor to find an interceptor for
+	 * @return
+	 * @throws UnknownAdviceTypeException
+	 */
 	@Override
 	public MethodInterceptor[] getInterceptors(Advisor advisor) throws UnknownAdviceTypeException {
 		List<MethodInterceptor> interceptors = new ArrayList<>(3);
+		// 从Advisor中获取 Advice
 		Advice advice = advisor.getAdvice();
 		if (advice instanceof MethodInterceptor) {
 			interceptors.add((MethodInterceptor) advice);
 		}
 		for (AdvisorAdapter adapter : this.adapters) {
 			if (adapter.supportsAdvice(advice)) {
+				// 转换为对应的 MethodInterceptor类型
+				// AfterReturningAdviceInterceptor MethodBeforeAdviceInterceptor  ThrowsAdviceInterceptor
 				interceptors.add(adapter.getInterceptor(advisor));
 			}
 		}
@@ -93,6 +116,7 @@ public class DefaultAdvisorAdapterRegistry implements AdvisorAdapterRegistry, Se
 		return interceptors.toArray(new MethodInterceptor[0]);
 	}
 
+	// 新增的 Advisor适配器
 	@Override
 	public void registerAdvisorAdapter(AdvisorAdapter adapter) {
 		this.adapters.add(adapter);

@@ -139,6 +139,8 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * 返回工厂中的所有beanNames，包括factory的祖先
+	 *
 	 * Return all bean names in the factory, including ancestor factories.
 	 * @param lbf the bean factory
 	 * @return the array of matching bean names, or an empty array if none
@@ -215,6 +217,8 @@ public abstract class BeanFactoryUtils {
 	}
 
 	/**
+	 * 返回给定类型的所有bean的名称集合，包括定义在祖先中的bean
+	 *
 	 * Get all bean names for the given type, including those defined in ancestor
 	 * factories. Will return unique names in case of overridden bean definitions.
 	 * <p>Does consider objects created by FactoryBeans, which means that FactoryBeans
@@ -268,12 +272,23 @@ public abstract class BeanFactoryUtils {
 			ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
 		Assert.notNull(lbf, "ListableBeanFactory must not be null");
+		// 获取与type（包括子类）匹配的bean名称,根据includeNonSingletons来决定是否包含原型+单例还是只包含单例,根据allowEargerInit
+		// 决定是否初始化lazy-init单例和由FactoryBeans创建的对象以进行类型检查
 		String[] result = lbf.getBeanNamesForType(type, includeNonSingletons, allowEagerInit);
+		// HierarchicalBeanFactory提供父容器的访问功能
+		// 如果lbf是HierarchicalBeanFactory
 		if (lbf instanceof HierarchicalBeanFactory) {
+			// 将lbf强转HierarchicalBeanFactory对象
 			HierarchicalBeanFactory hbf = (HierarchicalBeanFactory) lbf;
+			// ListableBeanFactory：扩展BeanFactory使其支持迭代Ioc容器持有的Bean对象。注意如果
+			// ListableBeanFactory同时也是HierarchicalBeanFactory，那么大多数情况下，
+			// 只迭代当前Ioc容器持有的Bean对象，不会在体系结构中想父级递归迭代
+			// 如果hbf的父工厂是ListableBeanFactory对象
 			if (hbf.getParentBeanFactory() instanceof ListableBeanFactory) {
+				// 递归该方法获取父工厂里type的所有bean名,包括父级工厂中定义的名称
 				String[] parentResult = beanNamesForTypeIncludingAncestors(
 						(ListableBeanFactory) hbf.getParentBeanFactory(), type, includeNonSingletons, allowEagerInit);
+				// 将result结果与parentResult合并
 				result = mergeNamesWithParent(result, parentResult, hbf);
 			}
 		}
@@ -534,16 +549,23 @@ public abstract class BeanFactoryUtils {
 	 * @since 4.3.15
 	 */
 	private static String[] mergeNamesWithParent(String[] result, String[] parentResult, HierarchicalBeanFactory hbf) {
+		// 如果parentResult是空数组，直接返回result
 		if (parentResult.length == 0) {
 			return result;
 		}
+		// 定义一个合并后的bean名结果集，初始化长度为result数组长度+parentResult数组长度
 		List<String> merged = new ArrayList<>(result.length + parentResult.length);
+		// 将result全部添加到merged中
 		merged.addAll(Arrays.asList(result));
+		// 遍历parentResult
 		for (String beanName : parentResult) {
+			// 如果merged没包含beanName且hbf没包含给定beanName
 			if (!merged.contains(beanName) && !hbf.containsLocalBean(beanName)) {
+				// 将beanName添加到merged中
 				merged.add(beanName);
 			}
 		}
+		// 将merged装换成数组返回出去
 		return StringUtils.toStringArray(merged);
 	}
 

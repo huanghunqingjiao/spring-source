@@ -28,6 +28,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 
 /**
+ * AbstractAutoProxyCreator的子类。SpringAOP中的核心类。用来创建Advisor和代理对象。
+ *
  * Generic auto proxy creator that builds AOP proxies for specific beans
  * based on detected Advisors for each bean.
  *
@@ -83,7 +85,9 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
 
+		// 找到符合条件的增强器对象
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
+		// 若为空则表示没找到
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
 		}
@@ -103,12 +107,14 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
-		// 获取所有的增强
+		// 将当前系统中所有的切面类的切面逻辑进行封装，从而得到目标Advisor
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
-		// 寻找所有增强中适用于bean的增强并应用
+		// 对获取到的所有Advisor进行判断，看其切面定义是否可以应用到当前bean，从而得到最终需要应用的Advisor
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
+		// 提供的hook方法，用于对目标Advisor进行扩展
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
+			// 对需要代理的Advisor按照一定的规则进行排序
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
 		return eligibleAdvisors;
@@ -127,6 +133,8 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	}
 
 	/**
+	 * 检测实例化之后的bean是否需要通知器，其实就是检测方法或者类上是否需要事务注解
+	 *
 	 * Search the given candidate Advisors to find all Advisors that
 	 * can apply to the specified bean.
 	 * @param candidateAdvisors the candidate Advisors

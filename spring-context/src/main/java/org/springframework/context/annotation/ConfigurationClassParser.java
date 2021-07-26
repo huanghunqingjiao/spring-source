@@ -240,7 +240,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
-		// 第一次进入的时候，configurationClass的size为0，existingClass肯定为null，在此处处理configuration重复import
+		// 第一次进入的时候，configurationClass的size为0，existingClas肯s定为null，在此处处理configuration重复import
 		// 如果同一个配置类被处理两次，两次都属于被import的则合并导入类，返回，如果配置类不是被导入的，则移除旧的使用新的配置类
 		ConfigurationClass existingClass = this.configurationClasses.get(configClass);
 		if (existingClass != null) {
