@@ -421,7 +421,7 @@ public class DataSourceTransactionManager extends AbstractPlatformTransactionMan
 	}
 
 	/**
-	 * 设置会馆标记，如果既没有保存点，又不是新的事务，如果可以设置全局的回滚标记的话，就会设置。
+	 * 设置回滚标记，如果既没有保存点，又不是新的事务，如果可以设置全局的回滚标记的话，就会设置。
 	 * @param status the status representation of the transaction
 	 */
 	@Override
